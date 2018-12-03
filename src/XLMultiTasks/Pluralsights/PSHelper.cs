@@ -11,7 +11,7 @@ namespace XLMultiTasks.Pluralsights
     {
         public PSHelper()
         {
-            NextTaskWaitSeconds = 30;
+            NextTaskWaitSeconds = 60;
         }
 
         public int NextTaskWaitSeconds { get; set; }
@@ -73,7 +73,7 @@ namespace XLMultiTasks.Pluralsights
                         break;
                     }
                     Console.Write("{0}%. ", (int)((float)(queryTask.Result.Data) * 100));
-                    Thread.Sleep(1000);
+                    Thread.Sleep(1000 * 2);
                 }
             }
         }
