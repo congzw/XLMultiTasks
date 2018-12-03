@@ -11,7 +11,7 @@ Number.prototype.myPadding = function () {
 };
 
 function log(message) {
-    log("[x]" + message);
+    console.log("[x]" + message);
 }
 
 function getVideoSrc(){
@@ -92,7 +92,7 @@ function downloadAllVideos() {
   log(link);
 
   var downloadAllVideosTimeout = 30000 * 2;
-  var pauseVideoTimeout = 6000;
+  var pauseVideoTimeout = 8000;
   var folderDom = getSectionDom();
   var sectionName = folderDom.find('h2').text();
   var finalFolderName = $('section:last').find('h2').text();
