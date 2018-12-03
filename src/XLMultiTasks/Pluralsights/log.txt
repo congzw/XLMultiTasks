@@ -1,0 +1,6 @@
+----
+Pluralsight/Caching in the .NET Stack Inside-Out/03 - Solution Cache Local Stores/01 - Introduction to Local Cache Stores.mp4
+https://raw.githubusercontent.com/congzw/AutoBuild/master/readme.md
+----
+Pluralsight/Caching in the .NET Stack Inside-Out/03 - Solution Cache Local Stores/02 - Abstracting The Store With ICache.mp4
+https://raw.githubusercontent.com/congzw/AutoBuild/master/readme.md
