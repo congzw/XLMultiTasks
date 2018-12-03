@@ -9,6 +9,13 @@ namespace XLMultiTasks.Pluralsights
 {
     public class PSHelper
     {
+        public PSHelper()
+        {
+            NextTaskWaitSeconds = 30;
+        }
+
+        public int NextTaskWaitSeconds { get; set; }
+
         public void Process()
         {
             var links = ParseFileLinks("log.txt");
@@ -56,8 +63,7 @@ namespace XLMultiTasks.Pluralsights
                 var startTask = xlHelper.StartTask(xlTaskItem);
                 Console.WriteLine("Processing: {0} => ", startTask.FileName);
 
-                var maxSeconds = 10*60;
-                for (int i = 0; i < maxSeconds; i++)
+                for (int i = 0; i < NextTaskWaitSeconds; i++)
                 {
                     var queryTask = xlHelper.QueryTask(startTask);
                     if (queryTask.Result.Success)
