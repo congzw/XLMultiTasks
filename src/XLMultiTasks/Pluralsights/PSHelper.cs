@@ -39,6 +39,7 @@ namespace XLMultiTasks.Pluralsights
         {
             int totalCount = taskItems.Count;
             int completeCount = 0;
+            string lastProcessUrl = string.Empty;
             while (true)
             {
                 if (taskItems.Count == 0)
@@ -46,6 +47,12 @@ namespace XLMultiTasks.Pluralsights
                     break;
                 }
                 var xlTaskItem = taskItems.Dequeue();
+                if (lastProcessUrl == xlTaskItem.Url)
+                {
+                    Console.WriteLine("Escape processed same task: {0}", xlTaskItem.FileName);
+                    continue;
+                }
+                lastProcessUrl = xlTaskItem.Url;
                 var startTask = xlHelper.StartTask(xlTaskItem);
                 Console.WriteLine("Processing: {0} => ", startTask.FileName);
 
@@ -69,11 +76,7 @@ namespace XLMultiTasks.Pluralsights
         {
             var fileLinks = new List<PluralsightFileLink>();
             var rawAllLines = File.ReadAllLines(logFileName);
-            var readAllLines = new List<string>();
-            foreach (var rawLine in rawAllLines)
-            {
-                readAllLines.Add(TrimLine(rawLine));
-            }
+            var readAllLines = FixLines(rawAllLines);
 
             for (int i = 0; i < readAllLines.Count; i++)
             {
@@ -101,5 +104,19 @@ namespace XLMultiTasks.Pluralsights
             var strings = line.Split(new[] {replace}, StringSplitOptions.RemoveEmptyEntries);
             return strings.LastOrDefault();
         }
+        private IList<string> FixLines(IEnumerable<string> rawAllLines)
+        {
+            var readAllLines = new List<string>();
+            foreach (var rawLine in rawAllLines)
+            {
+                if (!rawLine.StartsWith(PluralsightFileLink.Prefix, StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+                readAllLines.Add(TrimLine(rawLine));
+            }
+            return readAllLines;
+        }
+
     }
 }
