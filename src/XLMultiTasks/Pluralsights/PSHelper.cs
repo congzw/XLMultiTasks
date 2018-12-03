@@ -38,14 +38,13 @@ namespace XLMultiTasks.Pluralsights
         public void ProcessQueues(XLHelper xlHelper, Queue<XLTaskItem> taskItems)
         {
             int totalCount = taskItems.Count;
+            int completeCount = 0;
             while (true)
             {
                 if (taskItems.Count == 0)
                 {
                     break;
                 }
-
-                int completeCount = 0;
                 var xlTaskItem = taskItems.Dequeue();
                 var startTask = xlHelper.StartTask(xlTaskItem);
                 Console.WriteLine("Processing: {0} => ", startTask.FileName);
@@ -69,10 +68,16 @@ namespace XLMultiTasks.Pluralsights
         public IList<PluralsightFileLink> ParseFileLinks(string logFileName)
         {
             var fileLinks = new List<PluralsightFileLink>();
-            var readAllLines = File.ReadAllLines(logFileName);
-            for (int i = 0; i < readAllLines.Length; i++)
+            var rawAllLines = File.ReadAllLines(logFileName);
+            var readAllLines = new List<string>();
+            foreach (var rawLine in rawAllLines)
             {
-                var readAllLine = TrimLine(readAllLines[i]);
+                readAllLines.Add(TrimLine(rawLine));
+            }
+
+            for (int i = 0; i < readAllLines.Count; i++)
+            {
+                var readAllLine = readAllLines[i];
                 if (string.IsNullOrWhiteSpace(readAllLine))
                 {
                     break;
