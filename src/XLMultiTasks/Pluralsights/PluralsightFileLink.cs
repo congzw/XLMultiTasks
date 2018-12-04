@@ -4,7 +4,7 @@ namespace XLMultiTasks.Pluralsights
     {
         public static string EmptyLine = "----";
         public static string ReplaceSplit = "[x]";
-        public static string Prefix = "script.js:";
+        public static string LogLineContainMark = "script.js:";
         public string FixSaveFilePath { get; set; }
         public string Link { get; set; }
     }

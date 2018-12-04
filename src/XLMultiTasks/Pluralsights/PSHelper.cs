@@ -83,6 +83,11 @@ namespace XLMultiTasks.Pluralsights
             var fileLinks = new List<PluralsightFileLink>();
             var rawAllLines = File.ReadAllLines(logFileName);
             var readAllLines = FixLines(rawAllLines);
+            if (readAllLines.Count == 0)
+            {
+                Console.WriteLine("no record find!");
+                Console.Read();
+            }
 
             for (int i = 0; i < readAllLines.Count; i++)
             {
@@ -115,7 +120,7 @@ namespace XLMultiTasks.Pluralsights
             var readAllLines = new List<string>();
             foreach (var rawLine in rawAllLines)
             {
-                if (!rawLine.StartsWith(PluralsightFileLink.Prefix, StringComparison.OrdinalIgnoreCase))
+                if (!rawLine.Contains(PluralsightFileLink.LogLineContainMark))
                 {
                     continue;
                 }
