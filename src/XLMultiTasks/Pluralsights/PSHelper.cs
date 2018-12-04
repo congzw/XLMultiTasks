@@ -66,13 +66,15 @@ namespace XLMultiTasks.Pluralsights
                 var xlTaskItem = taskItems.Dequeue();
                 if (lastProcessUrl == xlTaskItem.Url)
                 {
-                    Console.WriteLine("Escape processed same task: {0}", xlTaskItem.FileName);
+                    completeCount++;
+                    Console.WriteLine("Escape processed same task: {0} => {1} / {2}", xlTaskItem.FileName, completeCount, totalCount);
                     continue;
                 }
                 var filePath = string.Format("{0}\\{1}", xlTaskItem.SaveTo, xlTaskItem.FileName);
                 if (File.Exists(filePath))
                 {
-                    Console.WriteLine("Escape completed task: {0}", filePath);
+                    completeCount++;
+                    Console.WriteLine("Escape completed task: {0} => {1} / {2}", xlTaskItem.FileName, completeCount, totalCount);
                     continue;
                 }
 
@@ -86,6 +88,14 @@ namespace XLMultiTasks.Pluralsights
                 for (int i = 0; i < NextTaskWaitSeconds; i++)
                 {
                     var queryTask = xlHelper.QueryTask(startTask);
+                    if (queryTask.Result.Success)
+                    {
+                        completeCount++;
+                        //Console.WriteLine("Complete => {0} / {1}", completeCount, totalCount);
+                        ConsoleHelper.UpdateLine(string.Format("Processing: {0} => Complete {1} / {2}", startTask.FileName, completeCount, totalCount));
+                        break;
+                    }
+
                     var completePercent = (float)queryTask.Result.Data;
                     if (Math.Abs(completePercent) < 0.01)
                     {
@@ -98,15 +108,8 @@ namespace XLMultiTasks.Pluralsights
                         continue;
                     }
 
-                    if (queryTask.Result.Success)
-                    {
-                        completeCount++;
-                        //Console.WriteLine("Complete => {0} / {1}", completeCount, totalCount);
-                        ConsoleHelper.UpdateLine(string.Format("Processing: {0} => Complete {1} / {2}", startTask.FileName, completeCount, totalCount));
-                        break;
-                    }
                     //Console.Write("{0}%. ", (int)((float)(queryTask.Result.Data) * 100));
-                    ConsoleHelper.UpdateLine(string.Format("Processing: {0} => {1}%", startTask.FileName, (int)((float)(queryTask.Result.Data) * 100)));
+                    ConsoleHelper.UpdateLine(string.Format("Processing: {0} => {1}%", startTask.FileName, (int)(completePercent * 100)));
                     Thread.Sleep(1000 * 2);
                 }
             }
