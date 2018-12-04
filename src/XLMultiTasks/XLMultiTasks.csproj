@@ -42,6 +42,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Common\MessageResult.cs" />
+    <Compile Include="Common\StringHelper.cs" />
     <Compile Include="Pluralsights\PSHelper.cs" />
     <Compile Include="Common\MyCommonHelper.cs" />
     <Compile Include="Pluralsights\PluralsightFileLink.cs" />

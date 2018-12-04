@@ -74,9 +74,22 @@ namespace XLMultiTasks.Pluralsights
                 var startTask = xlHelper.StartTask(xlTaskItem);
                 Console.WriteLine("Processing: {0} => ", startTask.FileName);
 
+                int taskFailCount = 0;
                 for (int i = 0; i < NextTaskWaitSeconds; i++)
                 {
                     var queryTask = xlHelper.QueryTask(startTask);
+                    var completePercent = (float)queryTask.Result.Data;
+                    if (Math.Abs(completePercent) < 0.01)
+                    {
+                        taskFailCount++;
+                    }
+                    if (taskFailCount > 10)
+                    {
+                        Console.WriteLine("fail: {0} {1} {2}", startTask.SaveTo, startTask.FileName, startTask.Url);
+                        taskFailCount = 0;
+                        continue;
+                    }
+
                     if (queryTask.Result.Success)
                     {
                         completeCount++;
@@ -111,9 +124,9 @@ namespace XLMultiTasks.Pluralsights
                 {
                     var fileLink = new PluralsightFileLink();
                     //Pluralsight/Java Fundamentals The Java Language/02 - Introduction and Setting up Your Environment/01 - Introduction.mp4
-                    var nameLine = readAllLines[i + 1];
-                    fileLink.FixSaveFilePath = nameLine.Replace("/", "\\");
-                    fileLink.Link = readAllLines[i + 2];
+                    var nameLine = readAllLines[i + 1].Trim().FixEmpty();
+                    fileLink.FixSaveFilePath = nameLine.Replace("/", "\\").FixEmpty();
+                    fileLink.Link = readAllLines[i + 2].Trim().FixEmpty();
                     fileLinks.Add(fileLink);
                 }
             }
