@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Threading;
 using XLMultiTasks.Common;
 using XLMultiTasks.XLDownloads;
@@ -70,9 +69,18 @@ namespace XLMultiTasks.Pluralsights
                     Console.WriteLine("Escape processed same task: {0}", xlTaskItem.FileName);
                     continue;
                 }
+                var filePath = string.Format("{0}\\{1}", xlTaskItem.SaveTo, xlTaskItem.FileName);
+                if (File.Exists(filePath))
+                {
+                    Console.WriteLine("Escape completed task: {0}", filePath);
+                    continue;
+                }
+
                 lastProcessUrl = xlTaskItem.Url;
                 var startTask = xlHelper.StartTask(xlTaskItem);
-                Console.WriteLine("Processing: {0} => ", startTask.FileName);
+                
+                ConsoleHelper.NewLine();
+                ConsoleHelper.UpdateLine(string.Format("Processing: {0} => ", startTask.FileName));
 
                 int taskFailCount = 0;
                 for (int i = 0; i < NextTaskWaitSeconds; i++)
@@ -93,10 +101,12 @@ namespace XLMultiTasks.Pluralsights
                     if (queryTask.Result.Success)
                     {
                         completeCount++;
-                        Console.WriteLine("Complete => {0} / {1}", completeCount, totalCount);
+                        //Console.WriteLine("Complete => {0} / {1}", completeCount, totalCount);
+                        ConsoleHelper.UpdateLine(string.Format("Processing: {0} => Complete {1} / {2}", startTask.FileName, completeCount, totalCount));
                         break;
                     }
-                    Console.Write("{0}%. ", (int)((float)(queryTask.Result.Data) * 100));
+                    //Console.Write("{0}%. ", (int)((float)(queryTask.Result.Data) * 100));
+                    ConsoleHelper.UpdateLine(string.Format("Processing: {0} => {1}%", startTask.FileName, (int)((float)(queryTask.Result.Data) * 100)));
                     Thread.Sleep(1000 * 2);
                 }
             }
