@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading;
+using XLMultiTasks.Common;
 using XLMultiTasks.XLDownloads;
 
 namespace XLMultiTasks.Pluralsights
@@ -18,12 +20,21 @@ namespace XLMultiTasks.Pluralsights
 
         public void Process()
         {
+            if (!File.Exists("log.txt"))
+            {
+                Console.WriteLine("log.txt file not exist!");
+                Console.Read();
+                return;
+            }
             var links = ParseFileLinks("log.txt");
             var xlTaskItems = CreateXlTaskQueues(links);
             //Download(xlTaskItems);
             var xlHelper = new XLHelper();
             xlHelper.Init();
             ProcessQueues(xlHelper, xlTaskItems);
+
+            Console.WriteLine("work complete!");
+            MyCommonHelper.TryChangeFileName("log.txt", string.Format("log_{0}.txt", DateTime.Now.ToString("yyyyMMdd-HHmmss")));
         }
 
         public Queue<XLTaskItem> CreateXlTaskQueues(IList<PluralsightFileLink> fileLinks)
