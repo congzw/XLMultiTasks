@@ -1,5 +1,7 @@
 var count = 0;
 var jq = null;
+var downloadAllVideosTimeout = 5000 * 6;
+var pauseVideoTimeout = 5000;
 var ajaxComplete = true;
 var mockWaitSecond = 10;
 Number.prototype.myPadding = function () {
@@ -32,7 +34,7 @@ function callTaskApi(taskDto) {
         success: function (mr) {
             ajaxComplete = true;
             try {
-                log(mr.Message + ' => wait: ' + mr.Data);
+                log(mr.Message + ' => wait seconds: ' + mr.Data + (downloadAllVideosTimeout / 1000));
                 mockWaitSecond = mr.Data;
             } catch (e) {
                 mockWaitSecond = randomIntFromInterval(1, 20);
@@ -131,8 +133,6 @@ function downloadAllVideos() {
 
     callTaskApi({ SaveFilePath: saveFilePath, Link: link });
 
-    var downloadAllVideosTimeout = 5000 * 6;
-    var pauseVideoTimeout = 5000;
     var folderDom = getSectionDom();
     var sectionName = folderDom.find('h2').text();
     var finalFolderName = $('section:last').find('h2').text();

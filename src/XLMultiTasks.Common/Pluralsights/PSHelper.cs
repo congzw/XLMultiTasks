@@ -226,12 +226,11 @@ namespace XLMultiTasks.Pluralsights
                     }
 
                     var completePercent = (float)queryTask.Result.Data;
-                    if (Math.Abs(completePercent) < 0.01)
+                    if (Math.Abs(completePercent) < 0.0001)
                     {
-                        Console.WriteLine(completePercent);
                         taskFailCount++;
                     }
-                    if (taskFailCount > 10)
+                    if (taskFailCount > 20)
                     {
                         ConsoleHelper.NewLine();
                         var message = string.Format("! Fail: {0}\n=> {1}", startTask.FileName, startTask.Url);
