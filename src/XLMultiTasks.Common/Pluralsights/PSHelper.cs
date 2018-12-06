@@ -181,7 +181,6 @@ namespace XLMultiTasks.Pluralsights
         private string lastAjaxTaskProcessUrl = string.Empty;
         public MessageResult ProcessAjaxTask(XLHelper xlHelper, AjaxTaskDto taskDto)
         {
-            ConsoleHelper.NewLine();
             var mr = new MessageResult();
             if (taskDto == null)
             {
@@ -196,7 +195,7 @@ namespace XLMultiTasks.Pluralsights
                 var xlTaskItem = AjaxTaskDto.ConvertToXLTaskItem(taskDto);
                 if (lastAjaxTaskProcessUrl == taskDto.Link)
                 {
-                    var message = string.Format("Escape processed same task: {0}", xlTaskItem.FileName);
+                    var message = string.Format("\nEscape processed same task: {0}", xlTaskItem.FileName);
                     Console.WriteLine(message);
                     mr.Message = message;
                     return mr;
@@ -204,7 +203,7 @@ namespace XLMultiTasks.Pluralsights
                 var filePath = string.Format("{0}\\{1}", xlTaskItem.SaveTo, xlTaskItem.FileName);
                 if (File.Exists(filePath))
                 {
-                    var message = string.Format("Escape completed task: {0}", xlTaskItem.FileName);
+                    var message = string.Format("\nEscape completed task: {0}", xlTaskItem.FileName);
                     Console.WriteLine(message);
                     mr.Message = message;
                     return mr;
@@ -219,6 +218,7 @@ namespace XLMultiTasks.Pluralsights
                     Thread.Sleep(2000);
                 }
 
+                ConsoleHelper.NewLine();
                 var startTask = xlHelper.StartTask(xlTaskItem);
 
                 ConsoleHelper.UpdateLine(string.Format("Processing: {0} => ", startTask.FileName));

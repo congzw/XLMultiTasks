@@ -14,6 +14,11 @@ function log(message) {
     console.log("[x]" + message);
 }
 
+function randomIntFromInterval(min, max)
+{
+    return Math.floor(Math.random() * (max - min + 1) + min);
+}
+
 var serviceUrl = "http://localhost:12345/Api/PS/AddTask";
 function callTaskApi(taskDto) {
     jq.ajax({
@@ -117,14 +122,15 @@ function downloadAllVideos() {
     var rawFileName = $('#module-clip-title').text().split(' : ').pop().trim();
     var finalFileName = $('section:last').find('li:last').find('h3').text();
 
+    var ramdomAdd = randomIntFromInterval(1, 20);
+
     $('#next-control').click();
     if (sectionName == finalFolderName && rawFileName == finalFileName) {
         alert("Full Course Downloaded!");
     } else {
         $('#next-control').click();
         setTimeout(pauseVideo, pauseVideoTimeout);
-        setTimeout(downloadAllVideos, downloadAllVideosTimeout);
-
+        setTimeout(downloadAllVideos, downloadAllVideosTimeout + ramdomAdd);
     }
 
     // chrome.runtime.sendMessage({
