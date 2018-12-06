@@ -8,7 +8,7 @@ namespace XLMultiTasksApi.Apis
 {
     public class PsController : ApiController
     {
-        private static readonly PSHelper _psHelper = new PSHelper();
+        private static readonly PSTaskHelper _psHelper = new PSTaskHelper();
         private static readonly XLHelper _xlHelper = new XLHelper();
 
         static PsController()

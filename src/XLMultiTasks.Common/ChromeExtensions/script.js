@@ -24,7 +24,7 @@ function randomIntFromInterval(min, max)
 }
 
 var serviceUrl = "http://localhost:12345/Api/PS/AddTask";
-function callTaskApi(taskDto) {
+function callTaskApi(taskDto, callback) {
     ajaxComplete = false;
     jq.ajax({
         type: "POST",
@@ -39,11 +39,13 @@ function callTaskApi(taskDto) {
             } catch (e) {
                 mockWaitSecond = randomIntFromInterval(1, 20);
                 log(e);
-            } 
+            }
+            callback();
         },
         error: function () {
             ajaxComplete = true;
             log("error");
+            callback();
         }
     });
 }
@@ -131,21 +133,27 @@ function downloadAllVideos() {
     log(saveFilePath);
     log(link);
 
-    callTaskApi({ SaveFilePath: saveFilePath, Link: link });
+    log('< callTaskApi');
+    callTaskApi({ SaveFilePath: saveFilePath, Link: link }, function () {
 
-    var folderDom = getSectionDom();
-    var sectionName = folderDom.find('h2').text();
-    var finalFolderName = $('section:last').find('h2').text();
-    var rawFileName = $('#module-clip-title').text().split(' : ').pop().trim();
-    var finalFileName = $('section:last').find('li:last').find('h3').text();
+        var folderDom = getSectionDom();
+        var sectionName = folderDom.find('h2').text();
+        var finalFolderName = $('section:last').find('h2').text();
+        var rawFileName = $('#module-clip-title').text().split(' : ').pop().trim();
+        var finalFileName = $('section:last').find('li:last').find('h3').text();
 
-    if (sectionName === finalFolderName && rawFileName === finalFileName) {
-        alert("Full Course Downloaded!");
-    } else {
-        $('#next-control').click();
-        setTimeout(pauseVideo, pauseVideoTimeout);
-        setTimeout(downloadAllVideos, downloadAllVideosTimeout + mockWaitSecond);
-    }
+        if (sectionName === finalFolderName && rawFileName === finalFileName) {
+            alert("Full Course Downloaded!");
+        } else {
+            setTimeout(downloadAllVideos, downloadAllVideosTimeout + mockWaitSecond);
+            log('click next link...');
+            $('#next-control').click();
+            setTimeout(pauseVideo, pauseVideoTimeout);
+        }
+
+        log('callTaskApi >');
+    });
+
 
     // chrome.runtime.sendMessage({
     //     action: 'download',
