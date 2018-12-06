@@ -7,11 +7,11 @@
   "homepage_url": "https://github.com/vatz88/Pluralsight-Course-Downloader",
   "content_scripts": [{
     "matches": ["https://app.pluralsight.com/*"],
-    "js": ["jquery.slim.min.js", "script.js"],
+    "js": ["jquery.js", "script.js"],
     "run_at": "document_end"
   }],
   "background": {
     "scripts": ["background.js"]
   },
-  "permissions": ["<all_urls>", "downloads"]
+  "permissions": ["<all_urls>", "downloads","http://localhost:12345/"]
 }

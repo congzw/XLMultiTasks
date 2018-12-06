@@ -8,7 +8,7 @@ using XLMultiTasks.XLDownloads;
 
 namespace XLMultiTasks.Pluralsights
 {
-    public class PSHelper
+    public partial class PSHelper
     {
         public PSHelper()
         {
@@ -41,12 +41,7 @@ namespace XLMultiTasks.Pluralsights
             var xlTaskItems = new Queue<XLTaskItem>();
             foreach (var fileLink in fileLinks)
             {
-                var xlTaskItem = new XLTaskItem();
-                var fileName = Path.GetFileName(fileLink.FixSaveFilePath);
-                var folderName = Path.GetDirectoryName(fileLink.FixSaveFilePath);
-                xlTaskItem.FileName = fileName;
-                xlTaskItem.SaveTo = AppDomain.CurrentDomain.BaseDirectory.TrimEnd('\\') + "\\" + folderName;
-                xlTaskItem.Url = fileLink.Link;
+                var xlTaskItem = ConvertToXLTaskItem(fileLink);
                 xlTaskItems.Enqueue(xlTaskItem);
             }
             return xlTaskItems;
@@ -145,6 +140,17 @@ namespace XLMultiTasks.Pluralsights
             }
             return fileLinks;
         }
+        
+        public static XLTaskItem ConvertToXLTaskItem(PluralsightFileLink fileLink)
+        {
+            var xlTaskItem = new XLTaskItem();
+            var fileName = Path.GetFileName(fileLink.FixSaveFilePath);
+            var folderName = Path.GetDirectoryName(fileLink.FixSaveFilePath);
+            xlTaskItem.FileName = fileName;
+            xlTaskItem.SaveTo = AppDomain.CurrentDomain.BaseDirectory.TrimEnd('\\') + "\\" + folderName;
+            xlTaskItem.Url = fileLink.Link;
+            return xlTaskItem;
+        }
 
         private string TrimLine(string line)
         {
@@ -165,6 +171,116 @@ namespace XLMultiTasks.Pluralsights
             }
             return readAllLines;
         }
+    }
 
+    //for ajax call
+    public partial class PSHelper
+    {
+        private int _ajaxTasksCount = 0;
+
+        private string lastAjaxTaskProcessUrl = string.Empty;
+        public MessageResult ProcessAjaxTask(XLHelper xlHelper, AjaxTaskDto taskDto)
+        {
+            ConsoleHelper.NewLine();
+            var mr = new MessageResult();
+            if (taskDto == null)
+            {
+                var message = "参数不能为空";
+                Console.WriteLine(message);
+                mr.Message = message;
+                return mr;
+            }
+
+            try
+            {
+                var xlTaskItem = AjaxTaskDto.ConvertToXLTaskItem(taskDto);
+                if (lastAjaxTaskProcessUrl == taskDto.Link)
+                {
+                    var message = string.Format("Escape processed same task: {0}", xlTaskItem.FileName);
+                    Console.WriteLine(message);
+                    mr.Message = message;
+                    return mr;
+                }
+                var filePath = string.Format("{0}\\{1}", xlTaskItem.SaveTo, xlTaskItem.FileName);
+                if (File.Exists(filePath))
+                {
+                    var message = string.Format("Escape completed task: {0}", xlTaskItem.FileName);
+                    Console.WriteLine(message);
+                    mr.Message = message;
+                    return mr;
+                }
+
+                lastAjaxTaskProcessUrl = xlTaskItem.Url;
+
+                //make sure only process one task a time!
+                _ajaxTasksCount++;
+                while (_ajaxTasksCount > 1)
+                {
+                    Thread.Sleep(2000);
+                }
+
+                var startTask = xlHelper.StartTask(xlTaskItem);
+
+                ConsoleHelper.UpdateLine(string.Format("Processing: {0} => ", startTask.FileName));
+
+                int taskFailCount = 0;
+                for (int i = 0; i < NextTaskWaitSeconds; i++)
+                {
+                    var queryTask = xlHelper.QueryTask(startTask);
+                    if (queryTask.Result.Success)
+                    {
+                        ConsoleHelper.UpdateLine(string.Format("Processing: {0} => 100%", startTask.FileName));
+                        break;
+                    }
+
+                    var completePercent = (float)queryTask.Result.Data;
+                    if (Math.Abs(completePercent) < 0.01)
+                    {
+                        taskFailCount++;
+                    }
+                    if (taskFailCount > 10)
+                    {
+                        ConsoleHelper.NewLine();
+                        Console.WriteLine("fail: {0} {1} {2}", startTask.SaveTo, startTask.FileName, startTask.Url);
+                        taskFailCount = 0;
+                        continue;
+                    }
+                    ConsoleHelper.UpdateLine(string.Format("Processing: {0} => {1}%", startTask.FileName, (int)(completePercent * 100)));
+                    Thread.Sleep(1000 * 2);
+                }
+
+                mr.Success = true;
+                mr.Message = string.Format("Processing Complete: {0} => ", startTask.FileName);
+                _ajaxTasksCount--;
+                return mr;
+            }
+            catch (Exception ex)
+            {
+                var message = ex.Message;
+                Console.WriteLine(message);
+                mr.Message = message;
+                return mr;
+            }
+        }
+    }
+    
+    public class AjaxTaskDto
+    {
+        public string SaveFilePath { get; set; }
+        public string Link { get; set; }
+
+        public static XLTaskItem ConvertToXLTaskItem(AjaxTaskDto taskDto)
+        {
+            //fix encode problems
+            taskDto.SaveFilePath = taskDto.SaveFilePath.Trim().FixEmpty();
+
+            var xlTaskItem = new XLTaskItem();
+            var fileName = Path.GetFileName(taskDto.SaveFilePath);
+            var folderName = Path.GetDirectoryName(taskDto.SaveFilePath);
+            xlTaskItem.FileName = fileName;
+            xlTaskItem.SaveTo = AppDomain.CurrentDomain.BaseDirectory.TrimEnd('\\') + "\\" + folderName;
+            xlTaskItem.Url = taskDto.Link;
+            return xlTaskItem;
+        }
     }
 }
