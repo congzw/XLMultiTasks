@@ -1,5 +1,7 @@
 var count = 0;
 var jq = null;
+var ajaxComplete = true;
+var mockWaitSecond = 10;
 Number.prototype.myPadding = function () {
     var number = this.valueOf();
     var length = 2;
@@ -21,15 +23,24 @@ function randomIntFromInterval(min, max)
 
 var serviceUrl = "http://localhost:12345/Api/PS/AddTask";
 function callTaskApi(taskDto) {
+    ajaxComplete = false;
     jq.ajax({
         type: "POST",
         url: serviceUrl,
         data: taskDto,
         dataType: 'json',
         success: function (mr) {
-            log(mr.Message);
+            ajaxComplete = true;
+            try {
+                log(mr.Message + ' => wait: ' + mr.Data);
+                mockWaitSecond = mr.Data;
+            } catch (e) {
+                mockWaitSecond = randomIntFromInterval(1, 20);
+                log(e);
+            } 
         },
         error: function () {
+            ajaxComplete = true;
             log("error");
         }
     });
@@ -106,6 +117,12 @@ function downloadCurrentVideo() {
 }
 
 function downloadAllVideos() {
+    if (!ajaxComplete) {
+        log("not complete, wait...");
+        setTimeout(downloadAllVideos, 5000);
+        return;
+    }
+
     var link = getVideoSrc();
     var saveFilePath = getSaveFilePath();
     log('----');
@@ -122,15 +139,12 @@ function downloadAllVideos() {
     var rawFileName = $('#module-clip-title').text().split(' : ').pop().trim();
     var finalFileName = $('section:last').find('li:last').find('h3').text();
 
-    var ramdomAdd = randomIntFromInterval(1, 20);
-
-    $('#next-control').click();
-    if (sectionName == finalFolderName && rawFileName == finalFileName) {
+    if (sectionName === finalFolderName && rawFileName === finalFileName) {
         alert("Full Course Downloaded!");
     } else {
         $('#next-control').click();
         setTimeout(pauseVideo, pauseVideoTimeout);
-        setTimeout(downloadAllVideos, downloadAllVideosTimeout + ramdomAdd);
+        setTimeout(downloadAllVideos, downloadAllVideosTimeout + mockWaitSecond);
     }
 
     // chrome.runtime.sendMessage({

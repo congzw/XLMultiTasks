@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using XLMultiTasks.Common;
 using XLMultiTasks.XLDownloads;
@@ -176,11 +177,10 @@ namespace XLMultiTasks.Pluralsights
     //for ajax call
     public partial class PSHelper
     {
-        private int _ajaxTasksCount = 0;
-
         private string lastAjaxTaskProcessUrl = string.Empty;
         public MessageResult ProcessAjaxTask(XLHelper xlHelper, AjaxTaskDto taskDto)
         {
+            var start = DateTime.Now;
             var mr = new MessageResult();
             if (taskDto == null)
             {
@@ -193,31 +193,23 @@ namespace XLMultiTasks.Pluralsights
             try
             {
                 var xlTaskItem = AjaxTaskDto.ConvertToXLTaskItem(taskDto);
-                if (lastAjaxTaskProcessUrl == taskDto.Link)
+                if (lastAjaxTaskProcessUrl == xlTaskItem.Url)
                 {
-                    var message = string.Format("\nEscape processed same task: {0}", xlTaskItem.FileName);
-                    Console.WriteLine(message);
+                    var message = string.Format("\nEscape processed same task: {0}\n", xlTaskItem.FileName);
+                    Console.Write(message);
                     mr.Message = message;
                     return mr;
                 }
                 var filePath = string.Format("{0}\\{1}", xlTaskItem.SaveTo, xlTaskItem.FileName);
                 if (File.Exists(filePath))
                 {
-                    var message = string.Format("\nEscape completed task: {0}", xlTaskItem.FileName);
-                    Console.WriteLine(message);
+                    var message = string.Format("\nEscape completed task: {0}\n", xlTaskItem.FileName);
+                    Console.Write(message);
                     mr.Message = message;
                     return mr;
                 }
 
                 lastAjaxTaskProcessUrl = xlTaskItem.Url;
-
-                //make sure only process one task a time!
-                _ajaxTasksCount++;
-                while (_ajaxTasksCount > 1)
-                {
-                    Thread.Sleep(2000);
-                }
-
                 ConsoleHelper.NewLine();
                 var startTask = xlHelper.StartTask(xlTaskItem);
 
@@ -236,14 +228,18 @@ namespace XLMultiTasks.Pluralsights
                     var completePercent = (float)queryTask.Result.Data;
                     if (Math.Abs(completePercent) < 0.01)
                     {
+                        Console.WriteLine(completePercent);
                         taskFailCount++;
                     }
                     if (taskFailCount > 10)
                     {
                         ConsoleHelper.NewLine();
-                        Console.WriteLine("fail: {0} {1} {2}", startTask.SaveTo, startTask.FileName, startTask.Url);
-                        taskFailCount = 0;
-                        continue;
+                        var message = string.Format("! Fail: {0}\n=> {1}", startTask.FileName, startTask.Url);
+                        Console.WriteLine(message);
+                        string saveMessage;
+                        var logFilePath = AppDomain.CurrentDomain.BaseDirectory.TrimEnd('\\') + "\\fail.txt";
+                        MyCommonHelper.TrySaveFile(logFilePath, message, Encoding.UTF8, out saveMessage);
+                        break;
                     }
                     ConsoleHelper.UpdateLine(string.Format("Processing: {0} => {1}%", startTask.FileName, (int)(completePercent * 100)));
                     Thread.Sleep(1000 * 2);
@@ -251,16 +247,20 @@ namespace XLMultiTasks.Pluralsights
 
                 mr.Success = true;
                 mr.Message = string.Format("Processing Complete: {0} => ", startTask.FileName);
-                _ajaxTasksCount--;
-                return mr;
+
+                var end = DateTime.Now;
+                var downloadSeconds = (int)(end - start).TotalSeconds;
+                var mockWatchSeconds = downloadSeconds * 1;
+                Console.WriteLine("\n{0} Mock Watch Seconds: {1}", xlTaskItem.FileName, mockWatchSeconds);
+                mr.Data = mockWatchSeconds;
             }
             catch (Exception ex)
             {
                 var message = ex.Message;
                 Console.WriteLine(message);
                 mr.Message = message;
-                return mr;
             }
+            return mr;
         }
     }
     
