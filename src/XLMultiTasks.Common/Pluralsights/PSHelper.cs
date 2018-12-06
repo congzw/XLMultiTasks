@@ -233,11 +233,10 @@ namespace XLMultiTasks.Pluralsights
                     if (taskFailCount > 20)
                     {
                         ConsoleHelper.NewLine();
-                        var message = string.Format("! Fail: {0}\n=> {1}", startTask.FileName, startTask.Url);
+                        var message = string.Format("! Fail: {0}\\{1}\n=> {2}\n", startTask.SaveTo, startTask.FileName, startTask.Url);
                         Console.WriteLine(message);
-                        string saveMessage;
                         var logFilePath = AppDomain.CurrentDomain.BaseDirectory.TrimEnd('\\') + "\\fail.txt";
-                        MyCommonHelper.TrySaveFile(logFilePath, message, Encoding.UTF8, out saveMessage);
+                        File.AppendAllText(logFilePath, message);
                         break;
                     }
                     ConsoleHelper.UpdateLine(string.Format("Processing: {0} => {1}%", startTask.FileName, (int)(completePercent * 100)));

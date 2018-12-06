@@ -34,7 +34,7 @@ function callTaskApi(taskDto) {
         success: function (mr) {
             ajaxComplete = true;
             try {
-                log(mr.Message + ' => wait seconds: ' + mr.Data + (downloadAllVideosTimeout / 1000));
+                log(mr.Message + ' => wait seconds: ' + (mr.Data  + " + "+ downloadAllVideosTimeout / 1000));
                 mockWaitSecond = mr.Data;
             } catch (e) {
                 mockWaitSecond = randomIntFromInterval(1, 20);
