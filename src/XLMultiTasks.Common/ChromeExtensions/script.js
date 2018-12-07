@@ -1,4 +1,4 @@
-var count = 0;
+﻿var count = 0;
 var jq = null;
 var downloadAllVideosTimeout = 5000 * 6;
 var pauseVideoTimeout = 5000;
@@ -14,6 +14,25 @@ Number.prototype.myPadding = function () {
     return str;
 };
 
+Date.prototype.format = function (fmt) { //author: meizz 
+    var o = {
+        "M+": this.getMonth() + 1, //月份 
+        "d+": this.getDate(), //日 
+        "H+": this.getHours(), //小时 
+        "m+": this.getMinutes(), //分 
+        "s+": this.getSeconds(), //秒 
+        "q+": Math.floor((this.getMonth() + 3) / 3), //季度 
+        "S": this.getMilliseconds() //毫秒 
+    };
+    if (/(y+)/.test(fmt))
+        fmt = fmt.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
+    for (var k in o)
+        if (new RegExp("(" + k + ")").test(fmt))
+            fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
+    return fmt;
+};
+
+
 function log(message) {
     console.log("[x]" + message);
 }
@@ -25,7 +44,7 @@ function randomIntFromInterval(min, max)
 
 var serviceUrl = "http://localhost:12345/Api/PS/AddTask";
 function callTaskApi(taskDto, callback) {
-    log('<< callTaskApi');
+    log('<< callTaskApi start!');
     ajaxComplete = false;
     jq.ajax({
         type: "POST",
@@ -111,11 +130,10 @@ function downloadCurrentVideo() {
 }
 
 function clickNext() {
-
-    log('click next link...');
+    log('click next link at: ' + new Date().format("HH:mm:ss"));
     $('#next-control').click();
     setTimeout(pauseVideo, pauseVideoTimeout);
-    downloadAllVideos();
+    setTimeout(downloadAllVideos, pauseVideoTimeout + 1000);
 }
 
 function downloadAllVideos() {
@@ -136,19 +154,19 @@ function downloadAllVideos() {
     var finalFileName = $('section:last').find('li:last').find('h3').text();
 
     log('----');
-    log('callTaskApi process');
     log(saveFilePath);
-    log(link);
+    //log(link);
 
     callTaskApi({ SaveFilePath: saveFilePath, Link: link }, function () {
 
         if (sectionName === finalFolderName && rawFileName === finalFileName) {
             alert("Full Course Downloaded!");
         } else {
-            log('wait seconds: ' + ((downloadAllVideosTimeout) / 1000 + mockWaitSecond));
-            setTimeout(clickNext, downloadAllVideosTimeout + mockWaitSecond * 1000);
+            //log(rawFileName + ' complete, should click next in seconds: ' + ((downloadAllVideosTimeout) / 1000 + mockWaitSecond));
+            //setTimeout(clickNext, downloadAllVideosTimeout + mockWaitSecond * 1000);
+            log('callApiTask [' + rawFileName + '] complete use '+ mockWaitSecond + ' seconds, click next in  ' + ((downloadAllVideosTimeout) / 1000));
+            setTimeout(clickNext, downloadAllVideosTimeout);
         }
-        log('callTaskApi complete >>');
     });
 }
 
