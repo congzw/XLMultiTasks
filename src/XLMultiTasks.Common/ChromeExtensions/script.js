@@ -25,6 +25,7 @@ function randomIntFromInterval(min, max)
 
 var serviceUrl = "http://localhost:12345/Api/PS/AddTask";
 function callTaskApi(taskDto, callback) {
+    log('<< callTaskApi');
     ajaxComplete = false;
     jq.ajax({
         type: "POST",
@@ -34,7 +35,7 @@ function callTaskApi(taskDto, callback) {
         success: function (mr) {
             ajaxComplete = true;
             try {
-                log(mr.Message + ' => wait seconds: ' + (mr.Data  + " + "+ downloadAllVideosTimeout / 1000));
+                log(mr.Message + ' => download use seconds: ' + mr.Data);
                 mockWaitSecond = mr.Data;
             } catch (e) {
                 mockWaitSecond = randomIntFromInterval(1, 20);
@@ -106,21 +107,19 @@ function downloadCurrentVideo() {
     var link = getVideoSrc();
     // log('downloadCurrentVideo: ');
     log(link);
-    var saveFilePath = getSaveFilePath();
     return;
-    // log('chrome download => ' + saveFilePath);
-    chrome.runtime.sendMessage({
-        action: 'download',
-        link: link,
-        filename: saveFilePath
-    },
-      function (response) {
-          log(response.actionStatus);
-      }
-    );
+}
+
+function clickNext() {
+
+    log('click next link...');
+    $('#next-control').click();
+    setTimeout(pauseVideo, pauseVideoTimeout);
+    downloadAllVideos();
 }
 
 function downloadAllVideos() {
+
     if (!ajaxComplete) {
         log("not complete, wait...");
         setTimeout(downloadAllVideos, 5000);
@@ -129,49 +128,31 @@ function downloadAllVideos() {
 
     var link = getVideoSrc();
     var saveFilePath = getSaveFilePath();
+
+    var folderDom = getSectionDom();
+    var sectionName = folderDom.find('h2').text();
+    var finalFolderName = $('section:last').find('h2').text();
+    var rawFileName = $('#module-clip-title').text().split(' : ').pop().trim();
+    var finalFileName = $('section:last').find('li:last').find('h3').text();
+
     log('----');
+    log('callTaskApi process');
     log(saveFilePath);
     log(link);
 
-    log('< callTaskApi');
     callTaskApi({ SaveFilePath: saveFilePath, Link: link }, function () {
-
-        var folderDom = getSectionDom();
-        var sectionName = folderDom.find('h2').text();
-        var finalFolderName = $('section:last').find('h2').text();
-        var rawFileName = $('#module-clip-title').text().split(' : ').pop().trim();
-        var finalFileName = $('section:last').find('li:last').find('h3').text();
 
         if (sectionName === finalFolderName && rawFileName === finalFileName) {
             alert("Full Course Downloaded!");
         } else {
-            setTimeout(downloadAllVideos, downloadAllVideosTimeout + mockWaitSecond);
-            log('click next link...');
-            $('#next-control').click();
-            setTimeout(pauseVideo, pauseVideoTimeout);
+            log('wait seconds: ' + ((downloadAllVideosTimeout) / 1000 + mockWaitSecond));
+            setTimeout(clickNext, downloadAllVideosTimeout + mockWaitSecond * 1000);
         }
-
-        log('callTaskApi >');
+        log('callTaskApi complete >>');
     });
-
-
-    // chrome.runtime.sendMessage({
-    //     action: 'download',
-    //     link: link,
-    //     filename: saveFilePath
-    //   },
-    //   function (response) {
-    //     // log('response => ' + response.actionStatus);
-    //     if (sectionName == finalFolderName && rawFileName == finalFileName) {
-    //       alert("Full Course Downloaded!");
-    //     } else {
-    //       $('#next-control').click();
-    //       setTimeout(pauseVideo, pauseVideoTimeout);
-    //       setTimeout(downloadAllVideos, downloadAllVideosTimeout);
-    //     }
-    //   }
-    // );
 }
+
+
 
 $(function () {
     $(document).keypress(function (e) {
