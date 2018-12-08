@@ -53,7 +53,7 @@ namespace XLMultiTasks.Pluralsights
             var startTask = xlHelper.StartTask(xlTaskItem);
 
             //·ÀÖ¹Á¬½ÓÌ«¿ì£¬×´Ì¬·µ»ØµÄ´íÎó
-            Thread.Sleep(5000);
+            Thread.Sleep(3000);
 
             var processSuccess = false;
             ConsoleHelper.UpdateLine(string.Format("Processing: {0} => ", startTask.FileName));
@@ -80,7 +80,7 @@ namespace XLMultiTasks.Pluralsights
                 if (tryConnectCount > 30)
                 {
                     processSuccess = false;
-                    var message = string.Format("! Fail: {0}\n", startTask.Url);
+                    var message = string.Format("! Fail: {0}\n{1}\n", startTask.Url, startTask.FileName);
                     var filePath = string.Format("{0}\\{1}\\{2}",
                         AppDomain.CurrentDomain.BaseDirectory.TrimEnd('\\'),
                         startTask.SaveTo, 
