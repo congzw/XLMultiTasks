@@ -52,9 +52,12 @@ namespace XLMultiTasks.Pluralsights
             ConsoleHelper.NewLine();
             var startTask = xlHelper.StartTask(xlTaskItem);
 
+            //·ÀÖ¹Á¬½ÓÌ«¿ì£¬×´Ì¬·µ»ØµÄ´íÎó
+            Thread.Sleep(5000);
+
             var processSuccess = false;
             ConsoleHelper.UpdateLine(string.Format("Processing: {0} => ", startTask.FileName));
-            int taskFailCount = 0;
+            int tryConnectCount = 0;
             for (int i = 0; i < ProcessTaskMaxSeconds; i++)
             {
                 var queryTask = xlHelper.QueryTask(startTask);
@@ -66,23 +69,34 @@ namespace XLMultiTasks.Pluralsights
                 }
 
                 var completePercent = (float)queryTask.Result.Data;
+                ConsoleHelper.UpdateLine(string.Format("Processing: {0} => {1}%", startTask.FileName, (int)(completePercent * 100)));
+
                 if (Math.Abs(completePercent) < 0.0001)
                 {
-                    taskFailCount++;
+                    tryConnectCount++;
+                    ConsoleHelper.UpdateLine(string.Format("Processing: {0} => {1}%  => connect time: {2}", startTask.FileName, (int)(completePercent * 100), tryConnectCount));
                 }
 
-                if (taskFailCount > 30)
+                if (tryConnectCount > 30)
                 {
+                    processSuccess = false;
+                    var message = string.Format("! Fail: {0}\n", startTask.Url);
+                    var filePath = string.Format("{0}\\{1}\\{2}",
+                        AppDomain.CurrentDomain.BaseDirectory.TrimEnd('\\'),
+                        startTask.SaveTo, 
+                        startTask.FileName);
+                    if (File.Exists(filePath))
+                    {
+                        processSuccess = true;
+                        message = "! File exist: completePercent => " + completePercent + " => " + filePath;
+                    }
                     ConsoleHelper.NewLine();
-                    var message = string.Format("! Fail: {0}\\{1}\n{2}\n", startTask.SaveTo, startTask.FileName, startTask.Url);
                     Console.WriteLine(message);
                     var logFilePath = AppDomain.CurrentDomain.BaseDirectory.TrimEnd('\\') + "\\fail.txt";
                     File.AppendAllText(logFilePath, message);
-                    processSuccess = false;
                     break;
                 }
 
-                ConsoleHelper.UpdateLine(string.Format("Processing: {0} => {1}%", startTask.FileName, (int)(completePercent * 100)));
                 Thread.Sleep(1000);
             }
             
