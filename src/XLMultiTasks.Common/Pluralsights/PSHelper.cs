@@ -232,10 +232,24 @@ namespace XLMultiTasks.Pluralsights
                     }
                     if (taskFailCount > 20)
                     {
-                        ConsoleHelper.NewLine();
-                        var message = string.Format("! Fail: {0}\\{1}\n=> {2}\n", startTask.SaveTo, startTask.FileName, startTask.Url);
-                        Console.WriteLine(message);
                         var logFilePath = AppDomain.CurrentDomain.BaseDirectory.TrimEnd('\\') + "\\fail.txt";
+                        ConsoleHelper.NewLine();
+                        var message = string.Format("[!Fail] {0}\n", filePath);
+                        //try fix ok file path
+                        var allFails = File.ReadAllLines(logFilePath);
+                        var fixMessage = message;
+                        foreach (var line in allFails)
+                        {
+                            var filePathInLine = line.Replace("[!Fail] ", "").Replace("\n", "");
+                            if (File.Exists(filePathInLine))
+                            {
+                                fixMessage = "[Fixed]" + message;
+                                var fixContent = File.ReadAllText(logFilePath).Replace(message, fixMessage);
+                                File.WriteAllText(filePath, fixContent);
+                                break;
+                            }
+                        }
+                        Console.WriteLine(fixMessage);
                         File.AppendAllText(logFilePath, message);
                         break;
                     }

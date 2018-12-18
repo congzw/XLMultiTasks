@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using System.Threading;
 using XLMultiTasks.Common;
 using XLMultiTasks.XLDownloads;
@@ -10,7 +12,7 @@ namespace XLMultiTasks.Pluralsights
     {
         public PSTaskHelper()
         {
-            ProcessTaskMaxSeconds = 60;
+            ProcessTaskMaxSeconds = 90;
         }
         
         public int ProcessTaskMaxSeconds { get; set; }
@@ -55,6 +57,8 @@ namespace XLMultiTasks.Pluralsights
             //·ÀÖ¹Á¬½ÓÌ«¿ì£¬×´Ì¬·µ»ØµÄ´íÎó
             Thread.Sleep(3000);
 
+            var logFilePath = AppDomain.CurrentDomain.BaseDirectory.TrimEnd('\\') + "\\fail.txt";
+            TryFixFailFile(logFilePath);
             var processSuccess = false;
             ConsoleHelper.UpdateLine(string.Format("Processing: {0} => ", startTask.FileName));
             int tryConnectCount = 0;
@@ -79,20 +83,16 @@ namespace XLMultiTasks.Pluralsights
 
                 if (tryConnectCount > 30)
                 {
-                    processSuccess = false;
-                    var message = string.Format("! Fail: {0}\n{1}\n", startTask.Url, startTask.FileName);
-                    var filePath = string.Format("{0}\\{1}\\{2}",
-                        AppDomain.CurrentDomain.BaseDirectory.TrimEnd('\\'),
-                        startTask.SaveTo, 
+                    var filePath = string.Format("{0}\\{1}",
+                        startTask.SaveTo,
                         startTask.FileName);
+                    var message = string.Format("{0}\n", filePath);
                     if (File.Exists(filePath))
                     {
                         processSuccess = true;
-                        message = "! File exist: completePercent => " + completePercent + " => " + filePath;
                     }
                     ConsoleHelper.NewLine();
                     Console.WriteLine(message);
-                    var logFilePath = AppDomain.CurrentDomain.BaseDirectory.TrimEnd('\\') + "\\fail.txt";
                     File.AppendAllText(logFilePath, message);
                     break;
                 }
@@ -109,6 +109,36 @@ namespace XLMultiTasks.Pluralsights
             mr.Message = string.Format("Processing Complete: {0} => {1}({2})", startTask.FileName, processSuccess, processSeconds);
             mr.Data = processSeconds;
             return mr;
+        }
+
+        private void TryFixFailFile(string logFilePath)
+        {
+            try
+            {
+                if (!File.Exists(logFilePath))
+                {
+                    return;
+                }
+                var failFilePaths = File.ReadAllLines(logFilePath);
+                var sb = new StringBuilder();
+                foreach (var failFilePath in failFilePaths)
+                {
+                    var item = failFilePath.Trim();
+                    if (!File.Exists(item))
+                    {
+                        sb.AppendLine(item);
+                    }
+                    else
+                    {
+                        Console.WriteLine("! Fix: {0}", item);
+                    }
+                }
+                File.WriteAllText(logFilePath, sb.ToString());
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("! Fix Ex: {0}", ex.Message);
+            }
         }
 
         private MessageResult CreateDelayBadResult(string message)
