@@ -54,11 +54,11 @@ namespace XLMultiTasks.Pluralsights
             ConsoleHelper.NewLine();
             var startTask = xlHelper.StartTask(xlTaskItem);
 
+            var logFilePath = AppDomain.CurrentDomain.BaseDirectory.TrimEnd('\\') + "\\fail.txt";
+            TryFixFailFile(logFilePath);
             //·ÀÖ¹Á¬½ÓÌ«¿ì£¬×´Ì¬·µ»ØµÄ´íÎó
             Thread.Sleep(3000);
 
-            var logFilePath = AppDomain.CurrentDomain.BaseDirectory.TrimEnd('\\') + "\\fail.txt";
-            TryFixFailFile(logFilePath);
             var processSuccess = false;
             ConsoleHelper.UpdateLine(string.Format("Processing: {0} => ", startTask.FileName));
             int tryConnectCount = 0;
@@ -123,6 +123,10 @@ namespace XLMultiTasks.Pluralsights
                 var sb = new StringBuilder();
                 foreach (var failFilePath in failFilePaths)
                 {
+                    if (string.IsNullOrWhiteSpace(failFilePath))
+                    {
+                        continue;
+                    }
                     var item = failFilePath.Trim();
                     if (!File.Exists(item))
                     {
@@ -133,7 +137,17 @@ namespace XLMultiTasks.Pluralsights
                         Console.WriteLine("! Fix: {0}", item);
                     }
                 }
-                File.WriteAllText(logFilePath, sb.ToString());
+
+                var failContent = sb.ToString();
+                if (!string.IsNullOrWhiteSpace(failContent))
+                {
+                    File.WriteAllText(logFilePath, sb.ToString());
+                }
+                else
+                {
+                    Console.WriteLine("! All fail log fixed, file deleted!");
+                    File.Delete(logFilePath);
+                }
             }
             catch (Exception ex)
             {
