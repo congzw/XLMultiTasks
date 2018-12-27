@@ -12,7 +12,7 @@ namespace XLMultiTasks.Pluralsights
     {
         public PSTaskHelper()
         {
-            ProcessTaskMaxSeconds = 90;
+            ProcessTaskMaxSeconds = 60*3;
         }
         
         public int ProcessTaskMaxSeconds { get; set; }
