@@ -80,8 +80,12 @@ function getVideoSrc() {
 }
 
 function pauseVideo() {
-    if ($('#play-control').length === 1) {
-        $('#play-control').click();
+
+    var $pauseButton = $('#play-control');
+    if ($pauseButton) {
+        $pauseButton.click();
+    } else if ($pauseButton.length === 1) {
+        $pauseButton.click();
     }
 }
 
