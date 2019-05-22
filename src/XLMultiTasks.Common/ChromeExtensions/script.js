@@ -137,7 +137,7 @@ function clickNext() {
     log('click next link at: ' + new Date().format("HH:mm:ss"));
     $('#next-control').click();
     setTimeout(pauseVideo, pauseVideoTimeout);
-    setTimeout(downloadAllVideos, pauseVideoTimeout + 1000);
+    downloadAllVideos();
 }
 
 function downloadAllVideos() {
