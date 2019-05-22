@@ -1,5 +1,7 @@
 ﻿using System;
 using System.IO;
+using XLMultiTasks.Common;
+using XLMultiTasks.Courses;
 using XLMultiTasks.Pluralsights;
 
 namespace XLMultiTasks
@@ -29,6 +31,21 @@ namespace XLMultiTasks
             {
                 Console.WriteLine("{0} => {1}", (++index).ToString("000"), updateCourse.CourseTitle);
             }
+            Console.Read();
+        }
+
+        static void GetCourses()
+        {
+            var myCourseFinder = new MyCourseFinder();
+            var testFolder = @"E:\2019_learn\_201905";
+            var myCourses = myCourseFinder.FindAll(testFolder);
+            foreach (var myCourse in myCourses)
+            {
+                Console.WriteLine("{0}\t{1}", myCourse.Title, myCourse.Size.ToFriendlySize());
+            }
+            
+            var json = myCourses.ToJson(true);
+            File.WriteAllText("courses.json", json);
             Console.Read();
         }
     }
