@@ -72,7 +72,7 @@ namespace XLMultiTasks.Courses
                 if (!sections.ContainsKey(sectionKey))
                 {
                     var mySection = new MySection();
-                    mySection.Title = myFileInfo.CourseInfo.Name;
+                    mySection.Title = myFileInfo.SectionInfo.Name;
                     sections.Add(sectionKey, mySection);
                     //add section to course
                     var course = courses[courseKey];

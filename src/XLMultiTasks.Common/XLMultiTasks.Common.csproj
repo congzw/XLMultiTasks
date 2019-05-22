@@ -43,9 +43,11 @@
     <Compile Include="Common\MessageResult.cs" />
     <Compile Include="Common\MyCommonHelper.cs" />
     <Compile Include="Common\StringHelper.cs" />
+    <Compile Include="Courses\AsciiTreeHelper.cs" />
     <Compile Include="Courses\LongSizeExtensions.cs" />
     <Compile Include="Courses\MyCourse.cs" />
     <Compile Include="Courses\MyCourseFinder.cs" />
+    <Compile Include="Courses\Node.cs" />
     <Compile Include="Pluralsights\PluralsightFileLink.cs" />
     <Compile Include="Pluralsights\PsCourseHelper.cs" />
     <Compile Include="Pluralsights\PSHelper.cs" />
