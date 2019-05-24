@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using XLMultiTasks.Common;
@@ -34,17 +36,16 @@ namespace XLMultiTasks.Pluralsights
                 return CreateDelayBadResult(message);
             }
 
-            var filePath = string.Format("{0}\\{1}", xlTaskItem.SaveTo, xlTaskItem.FileName);
-            if (File.Exists(filePath))
+            string existMessage;
+            var exist = CheckExist(xlTaskItem, out existMessage);
+            if (exist)
             {
-                var message = string.Format("Escape completed task: {0}", xlTaskItem.FileName);
                 Console.WriteLine();
-                Console.WriteLine(message);
-                return CreateDelayBadResult(message);
+                Console.WriteLine(existMessage);
+                return CreateDelayBadResult(existMessage);
             }
-
+            
             lastAjaxTaskUrl = xlTaskItem.Url;
-
             return ProcessTask(xlHelper, xlTaskItem);
         }
         
@@ -161,6 +162,56 @@ namespace XLMultiTasks.Pluralsights
             var mr = new MessageResult();
             mr.Message = message;
             return mr;
+        }
+
+        private bool CheckExist(XLTaskItem xlTaskItem, out string message)
+        {
+            //check file in disk?
+            var filePath = string.Format("{0}\\{1}", xlTaskItem.SaveTo, xlTaskItem.FileName);
+            if (File.Exists(filePath))
+            {
+                message = string.Format("Escape completed task: {0}", xlTaskItem.FileName);
+                return true;
+            }
+
+            //check file in db? 
+            var courseName = GuessCourseName(filePath);
+            if (!string.IsNullOrWhiteSpace(courseName))
+            {
+                var completedCourses = GetCompletedCourses();
+                if (completedCourses.Contains(courseName, StringComparer.OrdinalIgnoreCase))
+                {
+                    message = string.Format("!!! => Escape completed course: {0}", courseName);
+                    return true;
+                }
+            }
+            message = "New Task: " + xlTaskItem.FileName;
+            return false;
+        }
+
+        public static string GuessCourseName(string filePath)
+        {
+            //=> d:\a\b\c.mp4
+            var fileInfo = new FileInfo(filePath);
+            var sectionInfo = fileInfo.Directory;
+
+            var courseInfo = sectionInfo?.Parent;
+            return courseInfo?.Name;
+        }
+
+        private IList<string> _completedCourses = null;
+        private IList<string> GetCompletedCourses()
+        {
+            if (_completedCourses == null)
+            {
+                _completedCourses = new List<string>();
+                var dbFilePath = "completed_courses.json";
+                if (File.Exists(dbFilePath))
+                {
+                    _completedCourses = JsonHelper.Read(dbFilePath, new List<string>());
+                }
+            }
+            return _completedCourses;
         }
     }
 }

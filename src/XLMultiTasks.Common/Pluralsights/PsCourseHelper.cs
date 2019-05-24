@@ -81,17 +81,35 @@ namespace XLMultiTasks.Pluralsights
 
     public class JsonHelper
     {
-        public static void Save(string path, object data)
+        public static void Save(string path, object data, bool indented, bool appendExist)
         {
-            var serializeObject = JsonConvert.SerializeObject(data);
+            var serializeObject = JsonConvert.SerializeObject(data, indented ? Formatting.Indented : Formatting.None);
             if (!File.Exists(path))
             {
                 File.WriteAllText(path, serializeObject);
             }
             else
             {
-                File.AppendAllText(path, serializeObject);
+                if (appendExist)
+                {
+                    File.AppendAllText(path, serializeObject);
+                }
+                else
+                {
+                    File.WriteAllText(path, serializeObject);
+                }
             }
+        }
+
+        public static T Read<T>(string path, T defaultT)
+        {
+            if (!File.Exists(path))
+            {
+                return defaultT;
+            }
+
+            var readAllText = File.ReadAllText(path);
+            return JsonConvert.DeserializeObject<T>(readAllText);
         }
     }
 }

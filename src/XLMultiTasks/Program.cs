@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using XLMultiTasks.Common;
 using XLMultiTasks.Courses;
@@ -12,9 +13,46 @@ namespace XLMultiTasks
     {
         static void Main(string[] args)
         {
-            GetCourses();
-            return;
-               var psCourseHelper = new PsCourseHelper();
+            //Console.WriteLine(PSTaskHelper.GuessCourseName(@"d:\TheCourseName\b\c.mp4"));
+            //Console.WriteLine(PSTaskHelper.GuessCourseName(@"d:\a\TheCourseName\c\d.mp4"));
+            //Console.WriteLine(PSTaskHelper.GuessCourseName(@"d:\a\x\TheCourseName\c\d.mp4"));
+            //Console.Read();
+            //return;
+            var courseFolder = AppDomain.CurrentDomain.BaseDirectory;
+            var courseNames = new List<string>();
+            var dbFilePath = "completed_courses.json";
+            if (File.Exists(dbFilePath))
+            {
+                courseNames = JsonHelper.Read(dbFilePath, courseNames);
+            }
+            
+            var currentCourses = GetCourseNames(courseFolder);
+            foreach (var course in currentCourses)
+            {
+                if (!courseNames.Contains(course, StringComparer.OrdinalIgnoreCase))
+                {
+                    courseNames.Add(course);
+                    Console.WriteLine("add new course: " + course);
+                }
+            }
+
+            Console.WriteLine("****************");
+            Console.WriteLine("**** total courses: {0} ****", courseNames.Count);
+            //foreach (var course in courseNames)
+            //{
+            //    Console.WriteLine(course);
+            //}
+            Console.WriteLine("****************");
+
+            JsonHelper.Save("completed_courses.json", courseNames, true, false);
+
+            //UpdateCourses();
+            Console.Read();
+        }
+
+        private static void UpdateCourses()
+        {
+            var psCourseHelper = new PsCourseHelper();
             var dirPath = AppDomain.CurrentDomain.BaseDirectory;
             var directoryInfo = new DirectoryInfo(dirPath);
             if (directoryInfo.Parent == null)
@@ -29,20 +67,25 @@ namespace XLMultiTasks
 
             var logPath = dirPath.TrimEnd('\\') + "\\course.json";
             var updateCourses = psCourseHelper.UpdateCourses(logPath, collectCourses);
-            Console.WriteLine("---- updated total: {0} ----",updateCourses.Count);
+            Console.WriteLine("---- updated total: {0} ----", updateCourses.Count);
             int index = 0;
             foreach (var updateCourse in updateCourses)
             {
                 Console.WriteLine("{0} => {1}", (++index).ToString("000"), updateCourse.CourseTitle);
             }
-            Console.Read();
         }
 
-        static void GetCourses()
+        static IList<string> GetCourseNames(string courseFolder)
         {
             var myCourseFinder = new MyCourseFinder();
-            var testFolder = @"E:\2019_learn";
-            var myCourses = myCourseFinder.FindAll(testFolder);
+            var myCourses = myCourseFinder.FindAll(courseFolder).Select(x => x.Title).ToList();
+            return myCourses;
+        }
+
+        static void GetCourses(string courseFolder)
+        {
+            var myCourseFinder = new MyCourseFinder();
+            var myCourses = myCourseFinder.FindAll(courseFolder);
 
             foreach (var myCourse in myCourses)
             {
