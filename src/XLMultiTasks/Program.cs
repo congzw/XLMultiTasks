@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using XLMultiTasks.Common;
 using XLMultiTasks.Courses;
@@ -13,19 +14,32 @@ namespace XLMultiTasks
     {
         static void Main(string[] args)
         {
-            //Console.WriteLine(PSTaskHelper.GuessCourseName(@"d:\TheCourseName\b\c.mp4"));
-            //Console.WriteLine(PSTaskHelper.GuessCourseName(@"d:\a\TheCourseName\c\d.mp4"));
-            //Console.WriteLine(PSTaskHelper.GuessCourseName(@"d:\a\x\TheCourseName\c\d.mp4"));
-            //Console.Read();
-            //return;
-            var courseFolder = AppDomain.CurrentDomain.BaseDirectory;
+            var currentFolder = AppDomain.CurrentDomain.BaseDirectory;
             var courseNames = new List<string>();
             var dbFilePath = "completed_courses.json";
             if (File.Exists(dbFilePath))
             {
                 courseNames = JsonHelper.Read(dbFilePath, courseNames);
             }
+
+            //"." => ".."
+            var lookup = ExeNameHelper.Exist("_lookup");
             
+            var directoryInfo = new DirectoryInfo(currentFolder);
+            var parentFolderInfo = directoryInfo.Parent;
+            var courseFolder = lookup ? parentFolderInfo.FullName : currentFolder;
+            if (lookup)
+            {
+                Console.WriteLine("---- {0} => lookup => {1} ----",
+                    Path.GetFileName(Assembly.GetExecutingAssembly().CodeBase),
+                    parentFolderInfo.Name);
+            }
+            else
+            {
+                Console.WriteLine("---- {0} current => {1} ----",
+                    Path.GetFileName(Assembly.GetExecutingAssembly().CodeBase),
+                    currentFolder);
+            }
             var currentCourses = GetCourseNames(courseFolder);
             foreach (var course in currentCourses)
             {

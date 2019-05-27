@@ -1,13 +1,18 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.31101.0
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.489
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XLMultiTasks", "XLMultiTasks\XLMultiTasks.csproj", "{5140B545-7A6C-4A20-A1DA-37ADA7FCD4FD}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XLMultiTasksApi", "XLMultiTasksApi\XLMultiTasksApi.csproj", "{964687CD-F61D-4BD2-AB97-B46CFD78E4E8}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XLMultiTasks.Common", "XLMultiTasks.Common\XLMultiTasks.Common.csproj", "{229CFD8C-8B8D-4329-B611-2C7B1F7610A6}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{AC1F3B0D-CF3D-4B19-A274-CE474288355B}"
+	ProjectSection(SolutionItems) = preProject
+		..\readme.md = ..\readme.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -30,5 +35,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {4E6E1CE0-CA05-4901-BB0F-92868754F979}
 	EndGlobalSection
 EndGlobal
