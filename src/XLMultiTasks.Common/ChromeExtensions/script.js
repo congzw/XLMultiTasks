@@ -71,6 +71,11 @@ function callTaskApi(taskDto, callback) {
 }
 
 function getVideoSrc() {
+    //try fix get src error(domId changed) 20190730
+    var $video = $('video');
+    if($video != null && $video.src){
+        return $video.src;
+    }
     var link = $('#vjs_video_3_html5_api');
     if (!link.length) {
         //try fix get src error(domId changed) 
